@@ -1,0 +1,277 @@
+generator client {
+  provider   = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Nationality {
+  id           String   @id @default(uuid())
+  name         String   @unique
+  abbreviation String   @unique
+  code         String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  users        User[]
+
+  @@index([id])
+}
+
+model Department {
+  id             String             @id @default(uuid())
+  unitId         String
+  departmentName String
+  academicianId  String?
+  language       DepartmentLanguage @default(TR)
+  active         Boolean            @default(true)
+  academicInfo   AcademicInfo[]
+  unit           Unit               @relation(fields: [unitId], references: [id])
+  lessons        Lesson[]
+
+  @@index([unitId])
+}
+
+model Unit {
+  id           String         @id @default(uuid())
+  unitName     String
+  year         Int?
+  isDepartment Boolean        @default(false)
+  active       Boolean        @default(true)
+  AcademicInfo AcademicInfo[]
+  departments  Department[]
+  lessons      Lesson[]
+
+  @@index([id])
+}
+
+model Period {
+  id     String  @id @default(uuid())
+  period Json    @default("[{\"S\": 0, \"SM\": 0, \"YE\": null, \"YS\": null}]")
+  notes  Notes[]
+
+  @@index([id])
+}
+
+model AcademicInfo {
+  id           String     @id @default(uuid())
+  degree       Int        @default(0)
+  arrivalType  String?
+  grants       String?
+  status       Int        @default(0)
+  userId       String     @unique
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  semester     Semester
+  departmentId String
+  unitId       String
+  department   Department @relation(fields: [departmentId], references: [id])
+  unit         Unit       @relation(fields: [unitId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@index([id])
+}
+
+model IbanInformation {
+  id        String   @id @default(uuid())
+  fullName  String?
+  iban      String?
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([id, userId])
+}
+
+model TwoFactorAuthentication {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  service   String?
+  secretKey String   @unique
+  publicKey String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([id, userId])
+}
+
+model Verification {
+  id        String   @id @default(uuid())
+  identity  Int      @default(0)
+  info      Int      @default(0)
+  privacy   Int      @default(0)
+  contracts Int      @default(0)
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([id, userId])
+}
+
+model UserDetails {
+  id           String    @id @default(uuid())
+  address      String   
+  phoneNumber  String    @unique
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id])
+
+  @@index([id, userId])
+}
+
+model User {
+  id             String                   @id @default(uuid())
+  email          String                   @unique
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  username       String                   @unique
+  password       String
+  avatar         String?                  @default("/images/profile/avatar/default.webp")
+  birthday       DateTime
+  firstname      String
+  gender         Gender
+  identityNumber String                   @unique
+  lastname       String
+  nationalityId  String?
+  role           Role                     @default(STUDENT)
+  academicInfo   AcademicInfo?
+  accounts       Account[]
+  authenticator  Authenticator[]
+  ibanInfo       IbanInformation?
+  lessons        Lesson[]
+  notes          Notes[]
+  sessions       Session[]
+  twoFactorAuth  TwoFactorAuthentication?
+  nationality    Nationality?             @relation(fields: [nationalityId], references: [id])
+  userDetails    UserDetails?
+  verification   Verification?
+
+  @@index([id])
+  @@index([username])
+  @@index([identityNumber])
+  @@index([firstname, lastname])
+  @@index([email])
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionToken, userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+model Lesson {
+  id           String     @id @default(uuid())
+  lessonCode   String     @unique
+  lessonName   String
+  unitId       String
+  departmentId String
+  letterRange  Json       @default("{\"AA\": {\"end\": 100, \"start\": 90}, \"BA\": {\"end\": 90, \"start\": 80}, \"BB\": {\"end\": 80, \"start\": 75}, \"CB\": {\"end\": 75, \"start\": 65}, \"CC\": {\"end\": 65, \"start\": 60}, \"DC\": {\"end\": 60, \"start\": 55}, \"DD\": {\"end\": 55, \"start\": 50}, \"FD\": {\"end\": 50, \"start\": 0}, \"FF\": {\"end\": 49, \"start\": 0}}")
+  semester     Semester
+  degree       Int
+  attendance   Boolean
+  instructorId String
+  type         Json       @default("{\"online\": 0, \"rector\": 0, \"optional\": 0, \"compulsory\": 0}")
+  creditSystem Json       @default("{\"ects\": 6, \"credit\": 3}")
+  gradeWeight  Json       @default("{\"visa\": 40, \"final\": 60}")
+  department   Department @relation(fields: [departmentId], references: [id])
+  instructor   User       @relation(fields: [instructorId], references: [id])
+  unit         Unit       @relation(fields: [unitId], references: [id])
+  notes        Notes[]
+
+  @@index([instructorId, semester, degree])
+  @@index([id])
+}
+
+model Notes {
+  id          String  @id @default(uuid())
+  lessonId    String
+  periodId    String
+  repeatData  String?
+  exempted    Boolean @default(false)
+  isConcluded Boolean @default(false)
+  status      Boolean @default(false)
+  userId      String
+  notes       Json    @default("{\"visa\": [{\"M\": 0, \"O\": null, \"P\": 0, \"S\": 0, \"U\": null, \"MP\": 0, \"PD\": null, \"MPD\": null}], \"final\": [{\"M\": null, \"O\": null, \"P\": 0, \"S\": null, \"U\": null, \"MP\": 0, \"PD\": null, \"MPD\": null}], \"result\": [{\"N\": null, \"LG\": null}], \"remedial\": [{\"P\": 0, \"S\": null, \"PD\": null}]}")
+  lesson      Lesson  @relation(fields: [lessonId], references: [id])
+  period      Period  @relation(fields: [periodId], references: [id])
+  user        User    @relation(fields: [userId], references: [id])
+
+  @@index([id, userId])
+}
+
+enum LessonType {
+  ELECTIVE
+  COMPULSORY
+}
+
+enum Semester {
+  SPRING
+  FALL
+}
+
+enum Role {
+  STUDENT
+  ACADEMICIAN
+  PERSONAL
+  MANAGER
+  DEVELOPER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum DepartmentLanguage {
+  TR
+  EN
+  TR_EN
+}
