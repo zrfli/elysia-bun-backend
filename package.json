@@ -1,10 +1,11 @@
 {
-  "name": "Misy",
+  "name": "misy",
   "version": "1.0.50",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-	"build": "bunx prisma generate"
-	"start": "bun run src/index.ts"
+    "build": "bunx prisma generate",
+    "migrate": "bunx prisma migrate dev",
+    "start": "bunx run src/index.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",
