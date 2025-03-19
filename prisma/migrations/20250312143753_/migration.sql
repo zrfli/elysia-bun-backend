@@ -51,7 +51,8 @@ CREATE TABLE "Unit" (
 -- CreateTable
 CREATE TABLE "Period" (
     "id" TEXT NOT NULL,
-    "period" JSONB NOT NULL DEFAULT '[{"S": 0, "SM": 0, "YE": null, "YS": null}]',
+    "period" JSONB NOT NULL DEFAULT '[{"S": 0, "YE": null, "YS": null}]',
+    "semester" "Semester" NOT NULL,
 
     CONSTRAINT "Period_pkey" PRIMARY KEY ("id")
 );
@@ -88,11 +89,10 @@ CREATE TABLE "IbanInformation" (
 -- CreateTable
 CREATE TABLE "TwoFactorAuthentication" (
     "id" TEXT NOT NULL,
-    "secretKey" TEXT,
-    "status" INTEGER NOT NULL DEFAULT 0,
+    "secretKey" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "publicKey" TEXT NOT NULL,
+    "service" TEXT,
 
     CONSTRAINT "TwoFactorAuthentication_pkey" PRIMARY KEY ("id")
 );
@@ -114,11 +114,9 @@ CREATE TABLE "Verification" (
 -- CreateTable
 CREATE TABLE "UserDetails" (
     "id" TEXT NOT NULL,
-    "address" TEXT,
-    "phoneNumber" TEXT,
+    "address" TEXT NOT NULL,
+    "phoneNumber" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "UserDetails_pkey" PRIMARY KEY ("id")
 );
@@ -131,14 +129,14 @@ CREATE TABLE "User" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "avatar" TEXT DEFAULT '/profile/avatar/default.webp',
+    "avatar" TEXT DEFAULT '/images/profile/avatar/default.webp',
     "birthday" TIMESTAMP(3) NOT NULL,
     "firstname" TEXT NOT NULL,
     "gender" "Gender" NOT NULL,
     "identityNumber" TEXT NOT NULL,
     "lastname" TEXT NOT NULL,
-    "nationalityId" TEXT,
     "role" "Role" NOT NULL DEFAULT 'STUDENT',
+    "nationalityId" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -199,16 +197,16 @@ CREATE TABLE "Lesson" (
     "id" TEXT NOT NULL,
     "lessonCode" TEXT NOT NULL,
     "lessonName" TEXT NOT NULL,
-    "unitId" TEXT NOT NULL,
-    "departmentId" TEXT NOT NULL,
-    "letterRange" JSONB NOT NULL DEFAULT '{"AA": {"end": 100, "start": 90}, "BA": {"end": 90, "start": 80}, "BB": {"end": 80, "start": 75}, "CB": {"end": 75, "start": 65}, "CC": {"end": 65, "start": 60}, "DC": {"end": 60, "start": 55}, "DD": {"end": 55, "start": 50}, "FD": {"end": 50, "start": 0}, "FF": {"end": 49, "start": 0}}',
+    "unitId" TEXT,
+    "departmentId" TEXT,
+    "letterRange" JSONB DEFAULT '{"AA": {"end": 100, "start": 90}, "BA": {"end": 90, "start": 80}, "BB": {"end": 80, "start": 75}, "CB": {"end": 75, "start": 65}, "CC": {"end": 65, "start": 60}, "DC": {"end": 60, "start": 55}, "DD": {"end": 55, "start": 50}, "FD": {"end": 50, "start": 0}, "FF": {"end": 49, "start": 0}}',
     "semester" "Semester" NOT NULL,
     "degree" INTEGER NOT NULL,
     "attendance" BOOLEAN NOT NULL,
-    "instructorId" TEXT NOT NULL,
+    "instructorId" TEXT,
     "type" JSONB NOT NULL DEFAULT '{"online": 0, "rector": 0, "optional": 0, "compulsory": 0}',
-    "creditSystem" JSONB NOT NULL DEFAULT '{"ects": 6, "credit": 3}',
-    "gradeWeight" JSONB NOT NULL DEFAULT '{"visa": 40, "final": 60}',
+    "creditSystem" JSONB DEFAULT '{"ects": 6, "credit": 3}',
+    "gradeWeight" JSONB DEFAULT '{"visa": 40, "final": 60}',
 
     CONSTRAINT "Lesson_pkey" PRIMARY KEY ("id")
 );
@@ -226,6 +224,14 @@ CREATE TABLE "Notes" (
     "notes" JSONB NOT NULL DEFAULT '{"visa": [{"M": 0, "O": null, "P": 0, "S": 0, "U": null, "MP": 0, "PD": null, "MPD": null}], "final": [{"M": null, "O": null, "P": 0, "S": null, "U": null, "MP": 0, "PD": null, "MPD": null}], "result": [{"N": null, "LG": null}], "remedial": [{"P": 0, "S": null, "PD": null}]}',
 
     CONSTRAINT "Notes_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "_PeriodToUser" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+
+    CONSTRAINT "_PeriodToUser_AB_pkey" PRIMARY KEY ("A","B")
 );
 
 -- CreateIndex
@@ -259,10 +265,25 @@ CREATE INDEX "AcademicInfo_id_idx" ON "AcademicInfo"("id");
 CREATE UNIQUE INDEX "IbanInformation_userId_key" ON "IbanInformation"("userId");
 
 -- CreateIndex
+CREATE INDEX "IbanInformation_id_userId_idx" ON "IbanInformation"("id", "userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "TwoFactorAuthentication_secretKey_key" ON "TwoFactorAuthentication"("secretKey");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "TwoFactorAuthentication_userId_key" ON "TwoFactorAuthentication"("userId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "TwoFactorAuthentication_publicKey_key" ON "TwoFactorAuthentication"("publicKey");
+
+-- CreateIndex
+CREATE INDEX "TwoFactorAuthentication_id_userId_idx" ON "TwoFactorAuthentication"("id", "userId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Verification_userId_key" ON "Verification"("userId");
+
+-- CreateIndex
+CREATE INDEX "Verification_id_userId_idx" ON "Verification"("id", "userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserDetails_phoneNumber_key" ON "UserDetails"("phoneNumber");
@@ -278,6 +299,9 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_identityNumber_key" ON "User"("identityNumber");
 
 -- CreateIndex
 CREATE INDEX "User_id_idx" ON "User"("id");
@@ -314,6 +338,9 @@ CREATE INDEX "Lesson_id_idx" ON "Lesson"("id");
 
 -- CreateIndex
 CREATE INDEX "Notes_id_userId_idx" ON "Notes"("id", "userId");
+
+-- CreateIndex
+CREATE INDEX "_PeriodToUser_B_index" ON "_PeriodToUser"("B");
 
 -- AddForeignKey
 ALTER TABLE "Department" ADD CONSTRAINT "Department_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -352,13 +379,13 @@ ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId"
 ALTER TABLE "Authenticator" ADD CONSTRAINT "Authenticator_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Lesson" ADD CONSTRAINT "Lesson_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Lesson" ADD CONSTRAINT "Lesson_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Lesson" ADD CONSTRAINT "Lesson_instructorId_fkey" FOREIGN KEY ("instructorId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Lesson" ADD CONSTRAINT "Lesson_instructorId_fkey" FOREIGN KEY ("instructorId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Lesson" ADD CONSTRAINT "Lesson_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Lesson" ADD CONSTRAINT "Lesson_unitId_fkey" FOREIGN KEY ("unitId") REFERENCES "Unit"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Notes" ADD CONSTRAINT "Notes_lessonId_fkey" FOREIGN KEY ("lessonId") REFERENCES "Lesson"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -368,3 +395,9 @@ ALTER TABLE "Notes" ADD CONSTRAINT "Notes_periodId_fkey" FOREIGN KEY ("periodId"
 
 -- AddForeignKey
 ALTER TABLE "Notes" ADD CONSTRAINT "Notes_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_PeriodToUser" ADD CONSTRAINT "_PeriodToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Period"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_PeriodToUser" ADD CONSTRAINT "_PeriodToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,5 +1,5 @@
 generator client {
-  provider   = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -48,8 +48,10 @@ model Unit {
 
 model Period {
   id     String  @id @default(uuid())
-  period Json    @default("[{\"S\": 0, \"SM\": 0, \"YE\": null, \"YS\": null}]")
+  period Json    @default("[{\"S\": 0, \"YE\": null, \"YS\": null}]")
+  semester Semester
   notes  Notes[]
+  users  User[]  @relation("UserPeriods")
 
   @@index([id])
 }
@@ -86,12 +88,12 @@ model IbanInformation {
 }
 
 model TwoFactorAuthentication {
-  id        String   @id @default(uuid())
-  userId    String   @unique
+  id        String  @id @default(uuid())
+  secretKey String  @unique
+  userId    String  @unique
+  publicKey String  @unique
   service   String?
-  secretKey String   @unique
-  publicKey String   @unique
-  user      User     @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id])
 
   @@index([id, userId])
 }
@@ -111,17 +113,17 @@ model Verification {
 }
 
 model UserDetails {
-  id           String    @id @default(uuid())
-  address      String   
-  phoneNumber  String    @unique
-  userId       String    @unique
-  user         User      @relation(fields: [userId], references: [id])
+  id          String @id @default(uuid())
+  address     String
+  phoneNumber String @unique
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id])
 
   @@index([id, userId])
 }
 
 model User {
-  id             String                   @id @default(uuid())
+  id             String                   @id @default(uuid()) @unique
   email          String                   @unique
   createdAt      DateTime                 @default(now())
   updatedAt      DateTime                 @updatedAt
@@ -133,19 +135,20 @@ model User {
   gender         Gender
   identityNumber String                   @unique
   lastname       String
-  nationalityId  String?
   role           Role                     @default(STUDENT)
+  nationalityId  String?
   academicInfo   AcademicInfo?
-  accounts       Account[]
-  authenticator  Authenticator[]
   ibanInfo       IbanInformation?
-  lessons        Lesson[]
-  notes          Notes[]
-  sessions       Session[]
   twoFactorAuth  TwoFactorAuthentication?
   nationality    Nationality?             @relation(fields: [nationalityId], references: [id])
   userDetails    UserDetails?
   verification   Verification?
+  accounts       Account[]
+  authenticator  Authenticator[]
+  lessons        Lesson[]
+  notes          Notes[]
+  sessions       Session[]
+  periods        Period[]  @relation("UserPeriods")
 
   @@index([id])
   @@index([username])
@@ -209,25 +212,26 @@ model Authenticator {
 model Lesson {
   id           String     @id @default(uuid())
   lessonCode   String     @unique
-  lessonName   String
-  unitId       String
-  departmentId String
-  letterRange  Json       @default("{\"AA\": {\"end\": 100, \"start\": 90}, \"BA\": {\"end\": 90, \"start\": 80}, \"BB\": {\"end\": 80, \"start\": 75}, \"CB\": {\"end\": 75, \"start\": 65}, \"CC\": {\"end\": 65, \"start\": 60}, \"DC\": {\"end\": 60, \"start\": 55}, \"DD\": {\"end\": 55, \"start\": 50}, \"FD\": {\"end\": 50, \"start\": 0}, \"FF\": {\"end\": 49, \"start\": 0}}")
+  lessonName   String     
+  unitId       String?
+  departmentId String?
+  letterRange  Json?      @default("{\"AA\": {\"end\": 100, \"start\": 90}, \"BA\": {\"end\": 90, \"start\": 80}, \"BB\": {\"end\": 80, \"start\": 75}, \"CB\": {\"end\": 75, \"start\": 65}, \"CC\": {\"end\": 65, \"start\": 60}, \"DC\": {\"end\": 60, \"start\": 55}, \"DD\": {\"end\": 55, \"start\": 50}, \"FD\": {\"end\": 50, \"start\": 0}, \"FF\": {\"end\": 49, \"start\": 0}}")
   semester     Semester
   degree       Int
   attendance   Boolean
-  instructorId String
+  instructorId String?
   type         Json       @default("{\"online\": 0, \"rector\": 0, \"optional\": 0, \"compulsory\": 0}")
-  creditSystem Json       @default("{\"ects\": 6, \"credit\": 3}")
-  gradeWeight  Json       @default("{\"visa\": 40, \"final\": 60}")
-  department   Department @relation(fields: [departmentId], references: [id])
-  instructor   User       @relation(fields: [instructorId], references: [id])
-  unit         Unit       @relation(fields: [unitId], references: [id])
+  creditSystem Json?      @default("{\"ects\": 6, \"credit\": 3}")
+  gradeWeight  Json?      @default("{\"visa\": 40, \"final\": 60}")
+  department   Department? @relation(fields: [departmentId], references: [id])
+  instructor   User?       @relation(fields: [instructorId], references: [id])
+  unit         Unit?       @relation(fields: [unitId], references: [id])
   notes        Notes[]
 
   @@index([instructorId, semester, degree])
   @@index([id])
 }
+
 
 model Notes {
   id          String  @id @default(uuid())

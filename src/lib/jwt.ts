@@ -26,7 +26,7 @@ export function verifyToken(token: string): Props | null {
 }
 
 export function getUserFromToken(data: string): Props | null {
-  const token = data.toString();
+  const token = data.split(' ')[1];
   
   if (!token) return null;
 

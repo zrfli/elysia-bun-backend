@@ -4,7 +4,7 @@ export const CACHE = {
       KEY_PREFIX: "lessons", 
     },
     periods: {
-      EXPIRATION_TIME: 7200,
+      EXPIRATION_TIME: 3600,
       KEY_PREFIX: "periods",
     },
     users: {
