@@ -20,7 +20,13 @@
   },
   "devDependencies": {
     "bun-types": "latest",
-    "prisma": "^6.5.0"
+    "prisma": "^6.5.0",
+    "@types/bun": "latest"
   },
-  "module": "src/index.js"
+  "module": "src/index.js",
+  "type": "module",
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^5"
+  }
 }
