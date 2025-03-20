@@ -122,6 +122,15 @@ model UserDetails {
   @@index([id, userId])
 }
 
+model Avatars {
+  id        String   @id @default(uuid())
+  bucketId  String?
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([bucketId, id, userId])
+}
+
 model User {
   id             String                   @id @default(uuid()) @unique
   email          String                   @unique
@@ -129,7 +138,6 @@ model User {
   updatedAt      DateTime                 @updatedAt
   username       String                   @unique
   password       String
-  avatar         String?                  @default("/images/profile/avatar/default.webp")
   birthday       DateTime
   firstname      String
   gender         Gender
@@ -139,6 +147,7 @@ model User {
   nationalityId  String?
   academicInfo   AcademicInfo?
   ibanInfo       IbanInformation?
+  avatar         Avatars?
   twoFactorAuth  TwoFactorAuthentication?
   nationality    Nationality?             @relation(fields: [nationalityId], references: [id])
   userDetails    UserDetails?
