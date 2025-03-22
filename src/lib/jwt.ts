@@ -24,7 +24,7 @@ export async function verifyToken(token: string): Promise<Props | null> {
     const cacheKey = `${CACHE.jwt.KEY_PREFIX}:${token}`;
     const cacheExpirationTime = CACHE.jwt.EXPIRATION_TIME;
 
-    await setCache(cacheKey, decoded, cacheExpirationTime);
+    await setCache(cacheKey, decoded, cacheExpirationTime, true);
 
     return decoded;
   } catch (error) { return null; }
@@ -37,7 +37,7 @@ export async function getUserFromToken(data: string): Promise<Props | null> {
   if (!token) return null;
 
   const cacheKey = `${CACHE.jwt.KEY_PREFIX}:${token}`;
-  const cachedJwt = await getCache(cacheKey);
+  const cachedJwt = await getCache(cacheKey, true);
 
   if (cachedJwt?.exp && cachedJwt.exp > currentTime) return cachedJwt;
 
