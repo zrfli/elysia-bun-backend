@@ -9,7 +9,7 @@ export const getAllPeriods = async ({ userId }: Props) => {
     const cacheKey = `${CACHE.periods.KEY_PREFIX}:${userId}`;
     const cacheExpirationTime = CACHE.periods.EXPIRATION_TIME;;
 
-    const cachedPeriods = await getCache(cacheKey);
+    const cachedPeriods = await getCache(cacheKey, true);
 
     if (cachedPeriods) return cachedPeriods;
 
@@ -44,7 +44,7 @@ export const getAllPeriods = async ({ userId }: Props) => {
       }
     });
 
-    await setCache(cacheKey, periods, cacheExpirationTime);
+    await setCache(cacheKey, periods, cacheExpirationTime, true);
 
     return periods;
   } catch (error) {

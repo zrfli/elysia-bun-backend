@@ -15,7 +15,7 @@ export const getAvatar = async ({ userId, bucketId }: Props) => {
     const cacheKey = `${CACHE.avatar.KEY_PREFIX}:${userId}`;
     const cacheExpirationTime = CACHE.avatar.EXPIRATION_TIME;
     
-    const cachedAvatar = await getCache(cacheKey);
+    const cachedAvatar = await getCache(cacheKey, false);
 
     if (cachedAvatar) return cachedAvatar;
 
@@ -27,7 +27,7 @@ export const getAvatar = async ({ userId, bucketId }: Props) => {
 
     if (!s3Data) return null;
 
-    await setCache(cacheKey, s3Data, cacheExpirationTime);
+    await setCache(cacheKey, s3Data, cacheExpirationTime, false);
 
     return s3Data;
   } catch (error) {

@@ -9,7 +9,7 @@ export const getAllLessons = async ({ userId }: Props) => {
     const cacheKey = `${CACHE.lessons.KEY_PREFIX}:${userId}`;
     const cacheExpirationTime = CACHE.lessons.EXPIRATION_TIME;;
 
-    const cachedLessons = await getCache(cacheKey);
+    const cachedLessons = await getCache(cacheKey, true);
 
     if (cachedLessons) return cachedLessons;
 
@@ -25,8 +25,8 @@ export const getAllLessons = async ({ userId }: Props) => {
         },
       },
     });
-
-    await setCache(cacheKey, lessons, cacheExpirationTime);
+    
+    await setCache(cacheKey, lessons, cacheExpirationTime, true);
 
     return lessons;
   } catch (error) {
