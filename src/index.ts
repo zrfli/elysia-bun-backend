@@ -12,7 +12,7 @@ const app = new Elysia();
 app.use(cors({
   origin: CLIENT_URLS,
   allowedHeaders: "Content-Type,Authorization,Expires,Cache-Control,Pragma",
-  methods: "GET,POST,OPTIONS",
+  methods: "GET,POST,PUT,DELETE,OPTIONS"
 }));
 
 app.get("/api/lessons", async ({ headers }) => {
