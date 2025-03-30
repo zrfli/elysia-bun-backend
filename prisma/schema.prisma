@@ -89,9 +89,9 @@ model IbanInformation {
 
 model TwoFactorAuthentication {
   id        String  @id @default(uuid())
-  secretKey String  @unique
   userId    String  @unique
-  publicKey String  @unique
+  secretKey String
+  publicKey String?  
   service   String?
   user      User    @relation(fields: [userId], references: [id])
 
@@ -205,7 +205,7 @@ model VerificationToken {
 }
 
 model Authenticator {
-  credentialID         String  @unique
+  credentialId         String  @unique
   userId               String
   providerAccountId    String
   credentialPublicKey  String
@@ -215,7 +215,7 @@ model Authenticator {
   transports           String?
   user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([userId, credentialID])
+  @@id([userId, credentialId])
 }
 
 model Lesson {

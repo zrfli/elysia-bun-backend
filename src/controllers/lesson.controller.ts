@@ -7,12 +7,12 @@ interface Props { userId: string }
 export const getAllLessons = async ({ userId }: Props) => {
   try {
     const cacheKey = `${CACHE.lessons.KEY_PREFIX}:${userId}`;
-    const cacheExpirationTime = CACHE.lessons.EXPIRATION_TIME;;
+    const cacheExpirationTime = CACHE.lessons.EXPIRATION_TIME;
 
     const cachedLessons = await getCache(cacheKey, true);
-
     if (cachedLessons) return cachedLessons;
 
+    // Veritabanından dersleri çek
     const lessons = await prisma.notes.findMany({
       where: { userId },
       include: {
@@ -25,8 +25,10 @@ export const getAllLessons = async ({ userId }: Props) => {
         },
       },
     });
-    
+
     await setCache(cacheKey, lessons, cacheExpirationTime, true);
+    
+    //if (!cacheSuccess) console.warn(`Cache not set for key: ${cacheKey}`);
 
     return lessons;
   } catch (error) {

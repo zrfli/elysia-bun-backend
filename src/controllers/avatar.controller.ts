@@ -19,11 +19,7 @@ export const getAvatar = async ({ userId, bucketId }: Props) => {
 
     if (cachedAvatar) return cachedAvatar;
 
-    const s3Data = await minioClient.presignedGetObject(
-      bucketId,
-      `avatar/${userId}.png`,
-      24 * 60 * 60
-    );
+    const s3Data = await minioClient.presignedGetObject(bucketId, `avatar/${userId}.png`, 6 * 60 * 60);
 
     if (!s3Data) return null;
 

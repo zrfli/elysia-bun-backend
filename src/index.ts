@@ -1,5 +1,4 @@
 import { Elysia } from "elysia";
-import swagger from "@elysiajs/swagger";
 import { cors } from '@elysiajs/cors';
 import { Role } from "./lib/Roles";
 import { authenticate, authorize } from "./authMiddleware";
@@ -10,11 +9,11 @@ import { getAvatar } from "./controllers/avatar.controller";
 
 const app = new Elysia();
 
-app.use(swagger()).use(cors({
+app.use(cors({
   origin: CLIENT_URLS,
   allowedHeaders: "Content-Type,Authorization,Expires,Cache-Control,Pragma",
-  methods: "GET,POST,PUT,DELETE,OPTIONS",
-})).listen(process.env.PORT || 3001);
+  methods: "GET,POST,OPTIONS",
+}));
 
 app.get("/api/lessons", async ({ headers }) => {
   const { error, user } = await authenticate(headers);
@@ -26,7 +25,6 @@ app.get("/api/lessons", async ({ headers }) => {
   if (authError) return authError;
 
   const lessons = await getAllLessons({ userId: user.userId });
-
   return lessons.length === 0 ? { status: "success", message: "No lessons found." } : { status: "success", userId: user.userId, data: lessons };
 });
 
@@ -59,5 +57,9 @@ app.get("/api/avatar", async ({ headers }) => {
 
   return avatar.length === 0 ? { status: "success", message: "No avatar found." } : { status: "success", userId: user.userId, data: avatar };
 });
+
+app.get("/", () => { return "hi"; })
+
+app.listen(process.env.PORT || 3001);
 
 console.log(`Elysia is running.`);
