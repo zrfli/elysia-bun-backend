@@ -12,7 +12,7 @@ export const CACHE = {
     KEY_PREFIX: "users",
   },
   avatar: {
-    EXPIRATION_TIME: 86400,
+    EXPIRATION_TIME: 21600,
     KEY_PREFIX: "avatar",
   },
   jwt: {
