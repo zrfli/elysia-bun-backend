@@ -1,21 +1,20 @@
-import { prisma } from "../lib/prisma";
 import { getCache, setCache } from "../lib/cache";
 import { CACHE } from "../cacheConfig";
 import { minioClient } from "../lib/minio";
 
 interface Props { 
-  userId: string;
+  userId?: string;
   bucketId?: string;
 }
 
 export const getAvatar = async ({ userId, bucketId }: Props) => {
+  if (!userId) return null;
+  
   try {
     if (!userId || !bucketId) return null;
 
-    const cacheKey = `${CACHE.avatar.KEY_PREFIX}:${userId}`;
-    const cacheExpirationTime = CACHE.avatar.EXPIRATION_TIME;
-    
-    const cachedAvatar = await getCache(cacheKey, false);
+    const cacheConfing = CACHE.avatar;
+    const cachedAvatar = await getCache(userId, cacheConfing.REDIS_DB_KEY, false);
 
     if (cachedAvatar) return cachedAvatar;
 
@@ -23,7 +22,7 @@ export const getAvatar = async ({ userId, bucketId }: Props) => {
 
     if (!s3Data) return null;
 
-    await setCache(cacheKey, s3Data, cacheExpirationTime, false);
+    await setCache(userId, s3Data, cacheConfing.EXPIRATION_TIME, cacheConfing.REDIS_DB_KEY, false);
 
     return s3Data;
   } catch (error) {

@@ -1,18 +1,14 @@
 import { Role } from "./lib/Roles";
 import { getUserFromToken } from "./lib/jwt";
 
-export async function authenticate(headers: Record<string, string | undefined>) {
-  if (!headers.authorization) return { error: { status: "error", message: "Access denied. No token provided." }, user: null };
+export async function authMiddleware(headers: Record<string, string | undefined>, allowedRoles: Role[]) {
+  if (!headers.authorization) return { status: false, message: "Access denied. No token provided." };
 
   const user = await getUserFromToken(headers.authorization);
 
-  if (!user?.userId) return { error: { status: "error", message: "Access denied. Invalid token." }, user: null };
+  if (!user) return { status: false, message: "Access denied. User not found." };
+  if (!user.userId) return { status: false, message: "Access denied. Invalid token." };
+  if (!allowedRoles.includes(user.role)) return { status: false, message: "You do not have permission to access this resource." };
 
-  return { error: null, user };
-}
-
-export function authorize(user: any, allowedRoles: Role[]) {
-  if (!user || !allowedRoles.includes(user.role)) return { status: "error", message: "You do not have permission to access this resource." };
-
-  return null;
+  return { status: true, user };
 }

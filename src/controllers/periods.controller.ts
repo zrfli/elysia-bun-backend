@@ -2,14 +2,15 @@ import { prisma } from "../lib/prisma";
 import { getCache, setCache } from "../lib/cache";
 import { CACHE } from "../cacheConfig";
 
-interface Props { userId: string }
+interface Props { userId?: string }
 
 export const getAllPeriods = async ({ userId }: Props) => {
+  if (!userId) return null;
+  
   try {
-    const cacheKey = `${CACHE.periods.KEY_PREFIX}:${userId}`;
-    const cacheExpirationTime = CACHE.periods.EXPIRATION_TIME;;
+    const cacheConfing = CACHE.periods;
 
-    const cachedPeriods = await getCache(cacheKey, true);
+    const cachedPeriods = await getCache(userId, cacheConfing.REDIS_DB_KEY, true);
 
     if (cachedPeriods) return cachedPeriods;
 
@@ -44,7 +45,7 @@ export const getAllPeriods = async ({ userId }: Props) => {
       }
     });
 
-    await setCache(cacheKey, periods, cacheExpirationTime, true);
+    await setCache(userId, periods, cacheConfing.EXPIRATION_TIME, cacheConfing.REDIS_DB_KEY, true);
 
     return periods;
   } catch (error) {

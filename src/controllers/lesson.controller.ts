@@ -2,14 +2,15 @@ import { prisma } from "../lib/prisma";
 import { getCache, setCache } from "../lib/cache";
 import { CACHE } from "../cacheConfig";
 
-interface Props { userId: string }
+interface Props { userId?: string }
 
 export const getAllLessons = async ({ userId }: Props) => {
-  try {
-    const cacheKey = `${CACHE.lessons.KEY_PREFIX}:${userId}`;
-    const cacheExpirationTime = CACHE.lessons.EXPIRATION_TIME;
+  if (!userId) return null;
 
-    const cachedLessons = await getCache(cacheKey, true);
+  try {
+    const cacheConfing = CACHE.lessons;
+
+    const cachedLessons = await getCache(userId, cacheConfing.REDIS_DB_KEY, true);
     if (cachedLessons) return cachedLessons;
 
     // Veritabanından dersleri çek
@@ -26,7 +27,7 @@ export const getAllLessons = async ({ userId }: Props) => {
       },
     });
 
-    await setCache(cacheKey, lessons, cacheExpirationTime, true);
+    await setCache(userId, lessons, cacheConfing.EXPIRATION_TIME, cacheConfing.REDIS_DB_KEY, true);
     
     //if (!cacheSuccess) console.warn(`Cache not set for key: ${cacheKey}`);
 
