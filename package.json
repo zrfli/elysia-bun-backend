@@ -3,11 +3,11 @@
   "version": "1.0.50",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "generate": "bunx prisma generate",
-    "migrate": "bunx prisma migrate dev",
-    "start": "bunx run src/index.ts",
-    "server": "bunx run server/index.js",
-    "build-server": "bunx build --minify --splitting --outdir=server --target=bun ./src/index.ts"
+    "generate": "bun prisma generate",
+    "migrate": "bun prisma migrate dev",
+    "start": "bun run src/index.ts",
+    "server": "bun run server/index.js",
+    "build-server": "bun build --minify --splitting --outdir=server --target=bun ./src/index.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",
