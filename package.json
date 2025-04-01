@@ -3,19 +3,19 @@
   "version": "1.0.50",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bunx prisma generate",
+    "generate": "bunx prisma generate",
     "migrate": "bunx prisma migrate dev",
-    "start": "bunx run src/index.ts"
+    "start": "bunx run src/index.ts",
+    "server": "bunx run server/index.js",
+    "build-server": "bunx build --minify --splitting --outdir=server --target=bun ./src/index.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",
     "@prisma/client": "^6.5.0",
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/minio": "^7.1.1",
     "elysia": "latest",
     "ioredis": "^5.6.0",
-    "jsonwebtoken": "^9.0.2",
-    "minio": "^8.0.5"
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "bun-types": "latest",

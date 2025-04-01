@@ -1,6 +1,6 @@
 import { getCache, setCache } from "../lib/cache";
 import { CACHE } from "../cacheConfig";
-import { minioClient } from "../lib/minio";
+import s3 from "../lib/s3";
 
 interface Props { 
   userId?: string;
@@ -12,13 +12,13 @@ export const getAvatar = async ({ userId, bucketId }: Props) => {
   
   try {
     if (!userId || !bucketId) return null;
-
+    
     const cacheConfing = CACHE.avatar;
     const cachedAvatar = await getCache(userId, cacheConfing.REDIS_DB_KEY, false);
 
     if (cachedAvatar) return cachedAvatar;
 
-    const s3Data = await minioClient.presignedGetObject(bucketId, `avatar/${userId}.png`, 6 * 60 * 60);
+    const s3Data = s3.presign(`${bucketId}/avatar/${userId}.png`, { expiresIn: 6 * 60 * 60, acl: "private" });
 
     if (!s3Data) return null;
 

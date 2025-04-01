@@ -1,10 +1,10 @@
-import { redis } from "../lib/redis";
+import { redisClient } from "../lib/redis";
 
 export const getCache = async (key: string, redisDbKey: number, isObject: boolean) => {
-  await redis.select(redisDbKey);
+  await redisClient.select(redisDbKey);
 
   try {
-    const cachedData = await redis.get(key);
+    const cachedData = await redisClient.get(key);
     
     if (!cachedData) return null;
 
@@ -18,21 +18,21 @@ export const getCache = async (key: string, redisDbKey: number, isObject: boolea
 };
 
 export const setCache = async (key: string, data: any, expirationTime: number, redisDbKey: number, isObject: boolean) => {
-  await redis.select(redisDbKey);
+  await redisClient.select(redisDbKey);
 
   try {
     const value = isObject ? JSON.stringify(data) : data;
-    await redis.set(key, value, 'EX', expirationTime);
+    await redisClient.set(key, value, 'EX', expirationTime);
   } catch (error) {
     console.error("Redis set error:", error);
   }
 };
 
 export const deleteCache = async (key: string, redisDbKey: number) => {
-  await redis.select(redisDbKey);
+  await redisClient.select(redisDbKey);
   
   try {
-    await redis.del(key);
+    await redisClient.del(key);
   } catch (error) {
     console.error("Redis delete error:", error);
   }

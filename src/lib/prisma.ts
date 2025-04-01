@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+//import { postgres } from "bun";
 
 const globalForPrisma = global as unknown as { prisma?: PrismaClient };
 
