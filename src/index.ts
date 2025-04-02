@@ -41,6 +41,6 @@ app.get("/api/avatar", async ({ headers }) => {
 
 app.get("/", () => { return "hi"; });
 
-app.listen(process.env.PORT || 3001);
+app.listen(process.env.PORT);
 
 console.log(`Elysia is running.`);
