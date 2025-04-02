@@ -1,6 +1,8 @@
 import { getCache, setCache } from "../lib/cache";
 import { CACHE } from "../cacheConfig";
 import { db } from "../db";
+import { instructor, lesson, note, period } from "../db/schema";
+import { eq, and } from "drizzle-orm";
 
 interface Props { userId?: string }
 
@@ -12,18 +14,19 @@ export const getAllLessons = async ({ userId }: Props) => {
 
     const cachedLessons = await getCache(userId, cacheConfing.REDIS_DB_KEY, true);
     if (cachedLessons) return cachedLessons;
-
-    const lessons = await db.query.note.findMany({
-      where: (note, { eq }) => eq(note.userId, String(userId)),
-      with: {
-        lesson: {
-          with: {
-            instructor: true
-          }
-        },
-        period: true
-      }
-    });
+    
+    const lessons = await db
+      .select()
+      .from(note)
+      .leftJoin(lesson, eq(note.lessonId, lesson.id))
+      .leftJoin(instructor, eq(lesson.instructorId, instructor.id))
+      .leftJoin(period, eq(note.periodId, period.id))
+      .where(
+        and(
+          eq(note.userId, userId),
+          eq(lesson.semester, "SPRING") 
+        )
+      );
 
     await setCache(userId, lessons, cacheConfing.EXPIRATION_TIME, cacheConfing.REDIS_DB_KEY, true);
     
