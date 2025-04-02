@@ -1,25 +1,33 @@
 {
   "name": "misy",
-  "version": "1.0.50",
+  "version": "1.1.0",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "generate": "bun prisma generate",
-    "migrate": "bun prisma migrate dev",
+    "generate": "bunx drizzle-kit generate",
+    "db-push": "bunx drizzle-kit push",
     "start": "bun run src/index.ts",
     "server": "bun run server/index.js",
+    "studio": "bunx drizzle-kit studio",
     "build-server": "bun build --minify --splitting --outdir=server --target=bun ./src/index.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",
-    "@prisma/client": "^6.5.0",
     "@types/jsonwebtoken": "^9.0.9",
+    "drizzle-orm": "^0.41.0",
     "elysia": "latest",
     "ioredis": "^5.6.0",
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "bun-types": "latest",
-    "prisma": "^6.5.0"
+    "drizzle-kit": "^0.30.6",
+    "postgres": "^3.4.5",
+    "@types/bun": "latest"
   },
-  "module": "src/index.js"
+  "module": "src/index.js",
+  "type": "module",
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^5.8.2"
+  }
 }

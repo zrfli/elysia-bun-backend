@@ -23,13 +23,13 @@ app.get("/api/lessons", async ({ headers }) => {
   return lessons.length === 0 ? { status: "success", message: "No lessons found." } : { status: "success", userId: authResult.user?.userId, data: lessons };
 });
 
-app.get("/api/periods", async ({ headers }) => {
+/*app.get("/api/periods", async ({ headers }) => {
   const authResult = await authMiddleware(headers, [Role.STUDENT, Role.INSTRUCTOR]);
   if (!authResult.status) return { status: "error", message: authResult.message };
 
   const periods = await getAllPeriods({ userId: authResult.user?.userId });
   return periods.length === 0 ? { status: "success", message: "No periods found." } : { status: "success", userId: authResult.user?.userId, data: periods };
-});
+});*/
 
 app.get("/api/avatar", async ({ headers }) => {
   const authResult = await authMiddleware(headers, [Role.STUDENT, Role.INSTRUCTOR]);

@@ -1,4 +1,3 @@
-import { prisma } from "../lib/prisma";
 import { getCache, setCache } from "../lib/cache";
 import { CACHE } from "../cacheConfig";
 
@@ -14,7 +13,7 @@ export const getAllPeriods = async ({ userId }: Props) => {
 
     if (cachedPeriods) return cachedPeriods;
 
-    const periods = await prisma.period.findMany({
+    /*const periods = await prisma.period.findMany({
       where: {
         semester: 'SPRING',
         users: {
@@ -43,11 +42,11 @@ export const getAllPeriods = async ({ userId }: Props) => {
           }
         }
       }
-    });
+    });*/
 
-    await setCache(userId, periods, cacheConfing.EXPIRATION_TIME, cacheConfing.REDIS_DB_KEY, true);
+    //await setCache(userId, periods, cacheConfing.EXPIRATION_TIME, cacheConfing.REDIS_DB_KEY, true);
 
-    return periods;
+    //return periods;
   } catch (error) {
     console.error('Error fetching periods:', error);
     throw new Error('Failed to fetch periods from the database');

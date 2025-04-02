@@ -1,6 +1,6 @@
 import { getCache, setCache } from "../lib/cache";
 import { CACHE } from "../cacheConfig";
-import s3 from "../lib/s3";
+import { s3 } from "../lib/s3";
 
 interface Props { 
   userId?: string;

@@ -1,6 +1,6 @@
-import { prisma } from "../lib/prisma";
 import { getCache, setCache } from "../lib/cache";
 import { CACHE } from "../cacheConfig";
+import { db } from "../db";
 
 interface Props { userId?: string }
 
@@ -13,18 +13,16 @@ export const getAllLessons = async ({ userId }: Props) => {
     const cachedLessons = await getCache(userId, cacheConfing.REDIS_DB_KEY, true);
     if (cachedLessons) return cachedLessons;
 
-    // Veritabanından dersleri çek
-    const lessons = await prisma.notes.findMany({
-      where: { userId },
-      include: {
+    const lessons = await db.query.note.findMany({
+      where: (note, { eq }) => eq(note.userId, String(userId)),
+      with: {
         lesson: {
-          include: {
-            instructor: {  
-              select: { firstname: true, lastname: true }
-            },
-          },
+          with: {
+            instructor: true
+          }
         },
-      },
+        period: true
+      }
     });
 
     await setCache(userId, lessons, cacheConfing.EXPIRATION_TIME, cacheConfing.REDIS_DB_KEY, true);
