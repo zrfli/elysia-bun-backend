@@ -1,4 +1,4 @@
-import { Role } from "./lib/Roles";
+import { Role } from "./lib/roles";
 import { getUserFromToken } from "./lib/jwt";
 
 export async function authMiddleware(headers: Record<string, string | undefined>, allowedRoles: Role[]) {

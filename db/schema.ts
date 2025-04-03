@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { jsonb, varchar, pgTable, uuid, boolean, pgEnum } from "drizzle-orm/pg-core";
+import { jsonb, varchar, pgTable, uuid, boolean, pgEnum, primaryKey } from "drizzle-orm/pg-core";
 
 export const DepartmentLanguage = pgEnum('DepartmentLanguage', ['TR', 'EN', 'TR_EN']);
 export const Semester = pgEnum('Semester', ['SPRING', 'FALL']);
@@ -10,7 +10,7 @@ export const AcademicRank = pgEnum('AcademicRank', ['DR', 'ASSISTANT_PROFESSOR',
 export const instructor = pgTable("instructor", {
     id: uuid().primaryKey().defaultRandom().notNull().unique(),
     email: varchar().notNull(),
-    avatar: varchar().notNull(),
+    avatar: varchar(),
     name: varchar().notNull(),
     surname: varchar().notNull(),
     tag: AcademicRank().notNull(),
@@ -64,11 +64,17 @@ export const note = pgTable("note", {
     id: uuid().primaryKey().defaultRandom().notNull().unique(),
     userId: uuid("user_id").notNull(),
     lessonId: uuid("lesson_id").notNull().references(() => lesson.id),
-    periodId: uuid("period_id").notNull().references(() => period.id),
-    note: jsonb().default({ visa: [{ M: false, O: null, P: false, S: false, U: null, MP: false, PD: null, MPD: null }], final: [{ M: false, O: null, P: false, S: false, U: null, MP: false, PD: null, MPD: null }], result: [{ N: null, LG: null} ], remedial: [ { P: false, S: null, PD: null } ] }).notNull(),
+    exam: jsonb().default({ visa: [{ M: false, O: null, P: false, S: false, U: null, MP: false, PD: null, MPD: null }], final: [{ M: false, O: null, P: false, S: false, U: null, MP: false, PD: null, MPD: null }], result: [{ N: null, LG: null} ], remedial: [ { P: false, S: null, PD: null } ] }).notNull(),
     exempted: boolean().default(false),
     isConcluded: boolean("is_concluded").default(false),
 });
+
+export const noteToPeriod = pgTable('note_to_period', {
+    noteId: uuid('note_id').notNull().references(() => note.id),
+    periodId: uuid('period_id').notNull().references(() => period.id)
+    },
+    (t) => [ primaryKey({ columns: [t.noteId, t.periodId] }) ]
+);
 
 export const instructorRelations = relations(instructor, ({ many }) => ({
     lesson: many(lesson),
@@ -87,11 +93,16 @@ export const lessonRelations = relations(lesson, ({ one, many }) => ({
     instructor: one(instructor, { fields: [lesson.instructorId], references: [instructor.id] }),
 }));
 
-export const noteRelations = relations(note, ({ one }) => ({
+export const noteRelations = relations(note, ({ one, many }) => ({
     lesson: one(lesson, { fields: [note.lessonId], references: [lesson.id] }),
-    period: one(period, { fields: [note.periodId], references: [period.id] })
+    noteToPeriod: many(noteToPeriod)
 }));
 
 export const periodRelations = relations(period, ({ many }) => ({
-    note: many(note),
+    noteToPeriod: many(noteToPeriod),
+}));
+
+export const noteToPeriodRelations = relations(noteToPeriod, ({ one }) => ({
+    note: one(note, { fields: [noteToPeriod.noteId], references: [note.id] }),
+    period: one(period, { fields: [noteToPeriod.periodId], references: [period.id] })
 }));

@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { Role } from './Roles';
+import { Role } from './roles';
 import { CACHE } from '../cacheConfig';
 import { getCache, setCache } from './cache';
 

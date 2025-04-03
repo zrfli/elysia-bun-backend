@@ -1,11 +1,11 @@
 import { Elysia } from "elysia";
 import { cors } from '@elysiajs/cors';
-import { Role } from "./lib/Roles";
+import { Role } from "./lib/roles";
 import { authMiddleware } from "./authMiddleware";
-import { getAllLessons } from "./controllers/lesson.controller";
-import { getAllPeriods } from "./controllers/periods.controller";
+import { getAllLessons } from "./handlers/lesson";
+import { getAllPeriods } from "./handlers/periods";
+import { getAvatar } from "./handlers/avatar";
 import { CLIENT_URLS } from "./corsClient";
-import { getAvatar } from "./controllers/avatar.controller";
 
 new Elysia()
   .use(cors({
@@ -34,5 +34,5 @@ new Elysia()
     const periods = await getAllPeriods({ userId: authResult.user?.userId });
     return periods.length === 0 ? { status: "success", message: "No periods found." } : { status: "success", userId: authResult.user?.userId, data: periods };
   })
-  .get("/", () => { return "hi"; })
+  .get("/health", () => { return "OK"; })
   .listen(process.env.PORT || 3001);
