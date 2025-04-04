@@ -64,9 +64,17 @@ export const note = pgTable("note", {
     id: uuid().primaryKey().defaultRandom().notNull().unique(),
     userId: uuid("user_id").notNull(),
     lessonId: uuid("lesson_id").notNull().references(() => lesson.id),
-    exam: jsonb().default({ visa: [{ M: false, O: null, P: false, S: false, U: null, MP: false, PD: null, MPD: null }], final: [{ M: false, O: null, P: false, S: false, U: null, MP: false, PD: null, MPD: null }], result: [{ N: null, LG: null} ], remedial: [ { P: false, S: null, PD: null } ] }).notNull(),
-    exempted: boolean().default(false),
-    isConcluded: boolean("is_concluded").default(false),
+    exam: jsonb().default([
+        {
+            visa: { note: null, isPublish: false, publishDate: null, resitNote: null, resitIsPublish: false, resitPublishDate: null }, 
+            final: { note: null, isPublish: false, publishDate: null, resitNote: null, resitIsPublish: false, resitPublishDate: null }, 
+            result:  { note: null, letter: null, isPublish: false, publishDate: null }, 
+            remedial: { note: null, isPublish: false, publishDate: null }, 
+            isConcluded: false,
+            periodId: null
+        }
+    ]).notNull(),
+    exempted: boolean().default(false)
 });
 
 export const noteToPeriod = pgTable('note_to_period', {
