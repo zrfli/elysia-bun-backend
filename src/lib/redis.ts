@@ -16,6 +16,6 @@ export const redisClient = globalForRedis.redis || new Redis(redisUrl, {
     }
     return Math.min(times * 1000, 5000);
   }
-});
+}).pipeline();
 
 if (process.env.NODE_ENV !== "production") globalForRedis.redis = redisClient;

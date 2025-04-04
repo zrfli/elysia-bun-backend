@@ -34,5 +34,5 @@ new Elysia()
     const periods = await getAllPeriods({ userId: authResult.user?.userId });
     return periods.length === 0 ? { status: "success", message: "No periods found." } : { status: "success", userId: authResult.user?.userId, data: periods };
   })
-  .get("/health", () => { return "OK"; })
+  .get("/health", () => { return new Response("OK"); })
   .listen(process.env.PORT || 3001);
