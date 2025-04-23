@@ -41,7 +41,7 @@ export const period = pgTable("period", {
 export const lesson = pgTable("lesson", {
     id: uuid().primaryKey().defaultRandom().notNull().unique(),
     instructorId: uuid("instructor_id").notNull().references(() => instructor.id),
-    lessonCode: varchar("lesson_code").notNull(),
+    lessonCode: varchar("lesson_code").primaryKey().notNull(),
     lessonName: varchar("lesson_name").notNull(),
     letterRange: jsonb("letter_range").default({
         AA: { end: 100, start: 90 },
@@ -56,7 +56,7 @@ export const lesson = pgTable("lesson", {
     semester: Semester().notNull(),
     type: jsonb("type").default({ online: false, rector: false, optional: false, compulsory: false }).notNull(),
     creditSystem: jsonb("credit_system").default({ ects: 6, credit: 3 }).notNull(),
-    gradeWeight: jsonb("grade_weight").default({ visa: 40, final: 60 }).notNull(),
+    gradeWeight: jsonb("grade_weight").default({ visa: 40, final: 60, remedial: 60 }).notNull(),
     degree: Degree().notNull(),
 });
 

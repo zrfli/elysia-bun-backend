@@ -9,10 +9,10 @@ interface Props {
 
 export const getAvatar = async ({ userId, bucketId }: Props) => {
   if (!userId) return null;
-  
+
   try {
     if (!userId || !bucketId) return null;
-    
+
     const cacheConfing = CACHE.avatar;
     const cachedAvatar = await getCache(userId, cacheConfing.REDIS_DB_KEY, false);
 

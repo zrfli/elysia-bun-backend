@@ -2,24 +2,20 @@ import { redisClient } from "../lib/redis";
 
 export const getCache = async (key: string, redisDbKey: number, isObject: boolean) => {
   try {
-    await redisClient.select(redisDbKey);
+    const pipeline = redisClient.pipeline();
 
-    redisClient.get(key);
+    pipeline.select(redisDbKey);
+    pipeline.get(key);
 
-    const data = await redisClient.exec();
+    const result = await pipeline.exec();
 
-    if (data) return null;
+    if (!result || result.length < 2 || result[1][0]) return null;
 
-    if (isObject && data) {
-      try {
-        return JSON.parse(data);
-      } catch (error) {
-        console.error("Error parsing cached data:", error);
-        return null;
-      }
-    }
+    const value = result[1][1];
 
-    return data;
+    if (typeof value !== 'string') return null; 
+
+    return isObject ? JSON.parse(value) : value;
   } catch (error) {
     console.error("Redis get error:", error);
     return null;
@@ -27,14 +23,17 @@ export const getCache = async (key: string, redisDbKey: number, isObject: boolea
 };
 
 export const setCache = async (key: string, data: any, expirationTime: number, redisDbKey: number, isObject: boolean) => {
+  console.log("set cache");
+
   try {
-    await redisClient.select(redisDbKey);
+    const pipeline = redisClient.pipeline();
 
     const value = isObject ? JSON.stringify(data) : data;
 
-    redisClient.set(key, value, 'EX', expirationTime);
+    pipeline.select(redisDbKey);
+    pipeline.set(key, value, 'EX', expirationTime);
 
-    await redisClient.exec();
+    await pipeline.exec();
   } catch (error) {
     console.error("Redis set error:", error);
   }
@@ -42,11 +41,12 @@ export const setCache = async (key: string, data: any, expirationTime: number, r
 
 export const deleteCache = async (key: string, redisDbKey: number) => {
   try {
-    await redisClient.select(redisDbKey);
+    const pipeline = redisClient.pipeline();
 
-    redisClient.del(key);
+    pipeline.select(redisDbKey);
+    pipeline.del(key);
 
-    await redisClient.exec();
+    await pipeline.exec();
   } catch (error) {
     console.error("Redis delete error:", error);
   }

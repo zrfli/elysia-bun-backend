@@ -22,10 +22,10 @@ export const getAllLessons = async ({ userId }: Props) => {
                               period
                             FROM
                               "note"
-                              LEFT JOIN "lesson" ON "note"."lesson_id" = "lesson"."id"
-                              LEFT JOIN "instructor" ON "lesson"."instructor_id" = "instructor"."id"
-                              LEFT JOIN "note_to_period" ON "note_to_period"."note_id" = "note"."id"
-                              LEFT JOIN "period" ON "period"."id" = "note_to_period"."period_id"
+                              INNER JOIN "lesson" ON "note"."lesson_id" = "lesson"."id"
+                              INNER JOIN "instructor" ON "lesson"."instructor_id" = "instructor"."id"
+                              INNER JOIN "note_to_period" ON "note_to_period"."note_id" = "note"."id"
+                              INNER JOIN "period" ON "period"."id" = "note_to_period"."period_id"
                             WHERE
                               ("note"."user_id" = ${userId} AND "period"."id" = ${periodId} AND "period"."semester" = ${semester})`;
 
