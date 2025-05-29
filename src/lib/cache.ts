@@ -1,13 +1,12 @@
-import { redisClient } from "../lib/redis";
+import { redis } from "../lib/redis";
 
 export const getCache = async (key: string, redisDbKey: number, isObject: boolean) => {
+  //redis.connect();
+
   try {
-    const pipeline = redisClient.pipeline();
+    //redis.select(redisDbKey);
 
-    pipeline.select(redisDbKey);
-    pipeline.get(key);
-
-    const result = await pipeline.exec();
+    const result = await redis.get(key);
 
     if (!result || result.length < 2 || result[1][0]) return null;
 
@@ -24,16 +23,15 @@ export const getCache = async (key: string, redisDbKey: number, isObject: boolea
 
 export const setCache = async (key: string, data: any, expirationTime: number, redisDbKey: number, isObject: boolean) => {
   console.log("set cache");
+  //redis.connect();
 
   try {
-    const pipeline = redisClient.pipeline();
-
     const value = isObject ? JSON.stringify(data) : data;
 
-    pipeline.select(redisDbKey);
-    pipeline.set(key, value, 'EX', expirationTime);
+    //redis.select(redisDbKey);
+    const insertCache = await redis.set(key, value, 'EX', expirationTime);
 
-    await pipeline.exec();
+    if (!insertCache) console.log('insert error!');
   } catch (error) {
     console.error("Redis set error:", error);
   }
@@ -41,12 +39,8 @@ export const setCache = async (key: string, data: any, expirationTime: number, r
 
 export const deleteCache = async (key: string, redisDbKey: number) => {
   try {
-    const pipeline = redisClient.pipeline();
-
-    pipeline.select(redisDbKey);
-    pipeline.del(key);
-
-    await pipeline.exec();
+    //pipeline.select(redisDbKey);
+    await redis.del(key);
   } catch (error) {
     console.error("Redis delete error:", error);
   }
